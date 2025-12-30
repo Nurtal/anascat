@@ -237,7 +237,7 @@ def run_kmean(n_clusters,data,plot=False):
 
 
 
-def plot_clusters(image, tab_coords, labels, patch_size=64):
+def plot_clusters(image, tab_coords, labels, patch_size:int, image_name:str, target_label_list:list):
     """
     Affiche une image avec les patches colorés selon leur cluster.
 
@@ -264,6 +264,11 @@ def plot_clusters(image, tab_coords, labels, patch_size=64):
     cmap = plt.get_cmap('tab20', n_clusters)
     colors = cmap(np.arange(n_clusters))
 
+    # init mask
+    H, W = image.shape[:2]
+    mask = np.zeros((H, W), dtype=np.uint8)
+    target_label_list = [0]
+
     # Ajouter un rectangle pour chaque patch
     for (line_pixel, sample_pixel), label in zip(tab_coords, labels):
         rect = mpatches.Rectangle(
@@ -276,6 +281,17 @@ def plot_clusters(image, tab_coords, labels, patch_size=64):
         )
         ax.add_patch(rect)
 
+        if label in target_label_list:
+
+            x, y = int(rect.get_x()), int(rect.get_y())
+            w, h = int(rect.get_width()), int(rect.get_height())
+
+            x0 = max(0, x)
+            y0 = max(0, y)
+            x1 = min(W, x + w)
+            y1 = min(H, y + h)
+
+            mask[y0:y1, x0:x1] = 1
 
     # add legend
     handles = [
@@ -292,10 +308,23 @@ def plot_clusters(image, tab_coords, labels, patch_size=64):
         loc="best"
     )
 
+    # cluster plot
     ax.set_title(f"Clusters sur l'image générée (patch_size={patch_size})")
     ax.axis('off')
+    plt.savefig(f"images/{image_name}_scat.png")
+    plt.close()
+    
+    # mask
+    plt.imshow(mask, cmap="gray")
+    plt.title("Masque de segmentation")
+    plt.savefig(f"images/{image_name}_mask.png")
+    plt.close()
 
-    plt.show()
+    # mask applied on image
+    plt.imshow(image)
+    plt.imshow(mask, alpha=0.4, cmap="Reds")
+    plt.savefig(f"images/{image_name}_mask_applied.png")
+    plt.close()
 
 
 
@@ -304,7 +333,7 @@ if __name__ == "__main__":
 
     # params
     patch_size = 32
-    nb_cluster = 5
+    nb_cluster = 2
 
     # load image
     image = load_img("data/seg1.png")
@@ -313,7 +342,7 @@ if __name__ == "__main__":
     patch_list, coords = extract_patches(image, patch_size=32, step=None, normalize='log', mask=None) 
 
     # compute scattering
-    X = run_scattering(patch_list, 4,2, patch_size)
+    X = run_scattering(patch_list, 6,2, patch_size)
 
     # normalize data
     X = np.nan_to_num(X)
@@ -327,4 +356,5 @@ if __name__ == "__main__":
     labels = run_kmean(nb_cluster,X_umap,plot=True)
     
     # plot all clusters on image
-    plot_clusters(image, coords, labels, patch_size)
+    target_label_list = [0]
+    plot_clusters(image, coords, labels, patch_size, "segmentation_lvl_1", target_label_list)

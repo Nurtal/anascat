@@ -26,8 +26,9 @@ cp -r scattering_transform/scattering .
 ## TODO SEG
   - [x] craft seg1 img
   - [x] run patch scat clustering
-  - [ ] plot cluster in figure
-  - [ ] identify border cluster
-  - [ ] craft segmentation mask
+  - [x] plot cluster in figure
+  - [x] identify border cluster
+  - [x] craft segmentation mask
+  - [ ] refactor code for segmentation purpose
 
 
