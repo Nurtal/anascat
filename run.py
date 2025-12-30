@@ -288,6 +288,7 @@ if __name__ == "__main__":
 
     # params
     patch_size = 32
+    nb_cluster = 5
 
     # load image
     image = load_img("data/sample2.jpg")
@@ -307,7 +308,7 @@ if __name__ == "__main__":
     X_umap=run_umap(X_norm,plot=True)
 
     # run kmeans
-    labels = run_kmean(5,X_umap,plot=True)
+    labels = run_kmean(nb_cluster,X_umap,plot=True)
     
     # plot all clusters on image
     plot_clusters(image, coords, labels, patch_size)
