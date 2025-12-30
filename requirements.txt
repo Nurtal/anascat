@@ -1,1 +1,8 @@
-
+numpy
+pillow
+torch
+matplotlib
+scipy
+appdirs
+scikit-learn
+umap-learn
