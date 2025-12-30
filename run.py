@@ -276,6 +276,22 @@ def plot_clusters(image, tab_coords, labels, patch_size=64):
         )
         ax.add_patch(rect)
 
+
+    # add legend
+    handles = [
+        mpatches.Patch(
+            color=cmap(i),
+            label=str(i)
+        )
+        for i in range(n_clusters)
+    ]
+
+    ax.legend(
+        handles=handles,
+        title="Cluster",
+        loc="best"
+    )
+
     ax.set_title(f"Clusters sur l'image générée (patch_size={patch_size})")
     ax.axis('off')
 
@@ -291,7 +307,7 @@ if __name__ == "__main__":
     nb_cluster = 5
 
     # load image
-    image = load_img("data/sample2.jpg")
+    image = load_img("data/seg1.png")
 
     # split into patches
     patch_list, coords = extract_patches(image, patch_size=32, step=None, normalize='log', mask=None) 

@@ -13,8 +13,7 @@ git clone https://github.com/SihaoCheng/scattering_transform/
 cp -r scattering_transform/scattering .
 '''
 
-
-## Workflow
+## Workflow - Basic
   - [x] Load img
   - [x] extract patches
   - [x] run scatering
@@ -23,3 +22,12 @@ cp -r scattering_transform/scattering .
   - [x] kmean
   - [x] plot umap
   - [x] display cluster on orgin image
+
+## TODO SEG
+  - [x] craft seg1 img
+  - [x] run patch scat clustering
+  - [ ] plot cluster in figure
+  - [ ] identify border cluster
+  - [ ] craft segmentation mask
+
+
