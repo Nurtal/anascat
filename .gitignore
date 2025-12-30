@@ -1,4 +1,5 @@
 venv/*
 data/*
+images/*
 scattering/*
 scattering_transform/*
