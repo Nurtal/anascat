@@ -415,10 +415,13 @@ def run():
     # plot all clusters on image
     plot_clusters(image, coords, labels, patch_size, image_name)
 
-    # TODO user input for cluster list
+    # user input for cluster listI
+    user_i = input(f"[+] Select clusters for borders :\n -> Visualisation at images/{image_name}_scat.png\n >> ")
+    target_cluster_list = user_i.split(' ')
+    target_cluster_list = [int(x) for x in target_cluster_list]
 
     # generate mask
-    generate_mask(image, coords, labels, patch_size, image_name, [0])
+    generate_mask(image, coords, labels, patch_size, image_name, target_cluster_list)
 
 
 if __name__ == "__main__":
