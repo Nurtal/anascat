@@ -188,7 +188,7 @@ def run_scattering(dataset, J,L,patch_size):
 
 
 
-def run_umap(data,plot=False):
+def run_umap(data,image_name:str):
     """ 
         Run a umap with basic parameters on dataset 
     """
@@ -202,36 +202,36 @@ def run_umap(data,plot=False):
 
     X_umap = reducer.fit_transform(data)
 
-    if plot:
-        plt.figure(figsize=(8,6))
-        plt.scatter(X_umap[:,0], X_umap[:,1], s=5)
-        plt.title("UMAP – Scattering features")
-        plt.xlabel("UMAP-1")
-        plt.ylabel("UMAP-2")
-        plt.show()
+    plt.figure(figsize=(8,6))
+    plt.scatter(X_umap[:,0], X_umap[:,1], s=5)
+    plt.title("UMAP – Scattering features")
+    plt.xlabel("UMAP-1")
+    plt.ylabel("UMAP-2")
+    plt.savefig(f"images/{image_name}_umap.png")
+    plt.close()
 
     return X_umap
 
 
-def run_kmean(n_clusters,data,plot=False):
+def run_kmean(n_clusters,data,image_name:str):
     """ """
 
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     labels = kmeans.fit_predict(data)
 
-    if plot:
-        color_list = plt.cm.tab10.colors
-        plt.figure(figsize=(8,6))
-        for i in range(n_clusters):
-            plt.scatter(
-                data[labels == i, 0],
-                data[labels == i, 1],
-                color=color_list[i],
-                label=f'Cluster {i}'
-            )
-        plt.legend()
-        plt.title("K-means clustering")
-        plt.show()
+    color_list = plt.cm.tab10.colors
+    plt.figure(figsize=(8,6))
+    for i in range(n_clusters):
+        plt.scatter(
+            data[labels == i, 0],
+            data[labels == i, 1],
+            color=color_list[i],
+            label=f'Cluster {i}'
+        )
+    plt.legend()
+    plt.title("K-means clustering")
+    plt.savefig(f"images/{image_name}_kmean.png")
+    plt.close()
 
     return labels
 
@@ -393,8 +393,7 @@ def run():
     shutil.copy(image_file, f"images/{image_name}.{image_format}")
 
     # load image
-    image = load_img("data/seg1.png")
-
+    image = load_img(image_file)
 
     # split into patches
     patch_list, coords = extract_patches(image, patch_size=32, step=None, normalize='log', mask=None) 
@@ -408,18 +407,18 @@ def run():
     X_norm = scaler.fit_transform(X)
 
     # run umap
-    X_umap=run_umap(X_norm,plot=True)
+    X_umap=run_umap(X_norm,image_name)
 
     # run kmeans
-    labels = run_kmean(nb_cluster,X_umap,plot=True)
+    labels = run_kmean(nb_cluster,X_umap,image_name)
     
     # plot all clusters on image
-    plot_clusters(image, coords, labels, patch_size, "segmentation_lvl_1")
+    plot_clusters(image, coords, labels, patch_size, image_name)
 
     # TODO user input for cluster list
 
     # generate mask
-    generate_mask(image, coords, labels, patch_size, "segmentation_lvl_1", [0])
+    generate_mask(image, coords, labels, patch_size, image_name, [0])
 
 
 if __name__ == "__main__":
