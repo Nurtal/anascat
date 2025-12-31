@@ -29,6 +29,9 @@ cp -r scattering_transform/scattering .
   - [x] plot cluster in figure
   - [x] identify border cluster
   - [x] craft segmentation mask
-  - [ ] refactor code for segmentation purpose
+  - [x] refactor code for segmentation purpose
+  - [ ] create new sample image
+  - [ ] test
+  
 
 
