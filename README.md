@@ -30,8 +30,9 @@ cp -r scattering_transform/scattering .
   - [x] identify border cluster
   - [x] craft segmentation mask
   - [x] refactor code for segmentation purpose
-  - [ ] create new sample image
-  - [ ] test
+  - [x] create new sample image
+  - [x] test
+  - [ ] rerun kmeans option
   
 
 

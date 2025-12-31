@@ -10,6 +10,7 @@ from sklearn.preprocessing import StandardScaler
 import umap
 from sklearn.cluster import KMeans
 import shutil
+import re
 
 
 def load_img(img_file:str):
@@ -375,13 +376,46 @@ def generate_mask(image, tab_coords, labels, patch_size:int, image_name:str, tar
     plt.close()
 
 
+
+
+def select_cluster_border(image_name:str, X_umap, image, coords, patch_size) -> list:
+    """ """
+
+    # input params
+    good_cluster = False
+    target_cluster_list = []
+
+    # user input for cluster listI
+    while not good_cluster:
+        user_i = input(f"[+] Select clusters for borders :\n -> Visualisation at images/{image_name}_scat.png\n >> ")
+        if re.search('^rerun kmean', user_i):
+
+            # extract nb of cluster
+            nb_cluster = int(user_i.replace('rerun kmean ', ''))
+            
+            # run kmeans
+            labels = run_kmean(nb_cluster,X_umap,image_name)
+    
+            # plot all clusters on image
+            plot_clusters(image, coords, labels, patch_size, image_name)
+
+        else:
+            target_cluster_list = user_i.split(' ')
+            target_cluster_list = [int(x) for x in target_cluster_list]
+            good_cluster = True
+
+    return target_cluster_list
+
+
+
+
 def run():
     """ """
 
     # params
     patch_size = 32
     nb_cluster = 2
-    image_file = "data/seg1.png"
+    image_file = "data/seg2.png"
 
     # extract image name
     image_name = image_file.split('/')[-1].split('.')[0]
@@ -396,7 +430,7 @@ def run():
     image = load_img(image_file)
 
     # split into patches
-    patch_list, coords = extract_patches(image, patch_size=32, step=None, normalize='log', mask=None) 
+    patch_list, coords = extract_patches(image, patch_size, step=None, normalize='log', mask=None) 
 
     # compute scattering
     X = run_scattering(patch_list, 6,2, patch_size)
@@ -416,15 +450,25 @@ def run():
     plot_clusters(image, coords, labels, patch_size, image_name)
 
     # user input for cluster listI
-    user_i = input(f"[+] Select clusters for borders :\n -> Visualisation at images/{image_name}_scat.png\n >> ")
-    target_cluster_list = user_i.split(' ')
-    target_cluster_list = [int(x) for x in target_cluster_list]
+    target_cluster_list = select_cluster_border(image_name, X_umap, image, coords, patch_size) 
+    # user_i = input(f"[+] Select clusters for borders :\n -> Visualisation at images/{image_name}_scat.png\n >> ")
+    # target_cluster_list = user_i.split(' ')
+    # target_cluster_list = [int(x) for x in target_cluster_list]
 
     # generate mask
     generate_mask(image, coords, labels, patch_size, image_name, target_cluster_list)
+
+
+
+
+
 
 
 if __name__ == "__main__":
 
     run()
 
+
+
+
+    
