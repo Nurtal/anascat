@@ -32,7 +32,8 @@ cp -r scattering_transform/scattering .
   - [x] refactor code for segmentation purpose
   - [x] create new sample image
   - [x] test
-  - [ ] rerun kmeans option
+  - [x] rerun kmeans option
+  - [ ] test on cell data Amandine
   
 
 
