@@ -33,7 +33,11 @@ cp -r scattering_transform/scattering .
   - [x] create new sample image
   - [x] test
   - [x] rerun kmeans option
-  - [ ] test on cell data Amandine
+  - [x] test on cell data Amandine
   
+
+
+## Notes
+- [DATE:03/01/2026] structures trop fines sur data amandine, probablement need to reduce windows size
 
 

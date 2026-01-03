@@ -415,7 +415,7 @@ def run():
     # params
     patch_size = 32
     nb_cluster = 2
-    image_file = "data/seg2.png"
+    image_file = "data/Exp3.jpg"
 
     # extract image name
     image_name = image_file.split('/')[-1].split('.')[0]
