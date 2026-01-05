@@ -35,8 +35,6 @@ cp -r scattering_transform/scattering .
   - [x] rerun kmeans option
   - [x] test on cell data Amandine
   
-
-
 ## Notes
 - [DATE:03/01/2026] structures trop fines sur data amandine, probablement need to reduce windows size
 
