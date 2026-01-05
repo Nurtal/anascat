@@ -1,47 +1,7 @@
 from PIL import Image
 import numpy as np
-
-def image_to_patches(
-    image_path,
-    patch_size=(128, 128),
-    stride=(128, 128),
-    as_array=True
-):
-    """
-    Charge une image et la découpe en patches.
-
-    Args:
-        image_path (str): chemin vers l'image
-        patch_size (tuple): (hauteur, largeur) du patch
-        stride (tuple): pas de déplacement (hauteur, largeur)
-        as_array (bool): retourne les patches en numpy array
-
-    Returns:
-        patches: liste ou array de patches
-    """
-    img = Image.open(image_path).convert("RGB")
-    img = np.array(img)
-
-    H, W, C = img.shape
-    ph, pw = patch_size
-    sh, sw = stride
-
-    patches = []
-    coords = []
-
-    for y in range(0, H - ph + 1, sh):
-        for x in range(0, W - pw + 1, sw):
-            patch = img[y:y+ph, x:x+pw]
-            patches.append(patch)
-            coords.append((y, x))
-
-
-    if as_array:
-        patches = np.stack(patches)
-
-    return patches, coords
-
-
+import matplotlib.pyplot as plt
+import os
 
 def compute_patch_score(patch):
     """
@@ -73,12 +33,7 @@ def compute_patch_score(patch):
 
     return total_diff
 
-def get_mask(
-    image_path,
-    patch_size=(128, 128),
-    stride=(128, 128),
-    threshold=0.0
-):
+def get_mask(image_path, patch_size, stride, threshold, output_folder):
     """
     Génère un masque de segmentation à partir des scores de patches.
 
@@ -91,6 +46,7 @@ def get_mask(
     Returns:
         np.ndarray: masque de segmentation binaire (H, W)
     """
+
     # Charger image
     img = np.array(Image.open(image_path).convert("L"))  # grayscale
     H, W = img.shape
@@ -99,15 +55,23 @@ def get_mask(
     sh, sw = stride
 
     mask = np.zeros((H, W), dtype=np.uint8)
+    score_to_count = {}
 
     for y in range(0, H - ph + 1, sh):
         for x in range(0, W - pw + 1, sw):
             patch = img[y:y+ph, x:x+pw]
             
-            score = compute_patch_score(patch)
+            score = int(compute_patch_score(patch))
+            if score in score_to_count:
+                score_to_count[score] +=1
+            else:
+                score_to_count[score] = 1
 
             if score > threshold:
                 mask[y:y+ph, x:x+pw] = 1
+
+    bins = 450
+    plot_scores(score_to_count, bins, output_folder)
 
     return mask
 
@@ -130,19 +94,75 @@ def mask_to_image(mask, save_path=None):
         img.save(save_path)
 
 
-def run():
+
+def plot_scores(score_count_dict, bin_size, output_folder):
+    """
+    Barplot à partir d'un dict {score: count} avec regroupement par bins.
+
+    Args:
+        score_count_dict (dict): {score: count}
+        bin_size (int or float): largeur d'un bin
+    """
+    # Extraire et trier
+    scores = np.array(list(score_count_dict.keys()))
+    counts = np.array(list(score_count_dict.values()))
+
+    order = np.argsort(scores)
+    scores = scores[order]
+    counts = counts[order]
+
+    # Définir les bins
+    min_score = scores.min()
+    max_score = scores.max()
+    bins = np.arange(min_score, max_score + bin_size, bin_size)
+
+    # Agrégation par bin
+    bin_counts = np.zeros(len(bins) - 1)
+
+    for s, c in zip(scores, counts):
+        idx = np.searchsorted(bins, s, side="right") - 1
+        if 0 <= idx < len(bin_counts):
+            bin_counts[idx] += c
+
+    # Labels des bins
+    bin_labels = [f"{bins[i]}–{bins[i+1]}" for i in range(len(bins) - 1)]
+
+    # Plot
+    plt.figure()
+    plt.bar(bin_labels, bin_counts)
+    plt.xticks(rotation=45, ha="right")
+    plt.xlabel("Score range")
+    plt.ylabel("Count")
+    plt.title("Binned score distribution")
+    plt.tight_layout()
+    plt.savefig(f"{output_folder}/scores.png")
+    plt.close()
+
+
+def run(input_image, output_folder, score_treshold, p_size, s_size):
     """ """
 
-    print("Tardis")
+    # create output folder if needed
+    if not os.path.isdir(output_folder):
+        os.mkdir(output_folder)
+
+    # compute mask
+    mask = get_mask(input_image, (p_size, p_size), (s_size, s_size), score_treshold, output_folder)
+
+    # save mask
+    mask_to_image(mask, f"{output_folder}/mask.png")
+
 
 if __name__ == "__main__":
 
+    # params
+    image_name = "data/Exp3.jpg"
+    output_folder = "/tmp/machin"
+    score_treshold = 500
+    p_size = 8
+    s_size = 8
 
-    mask = get_mask(
-        "data/Exp3.jpg",
-        patch_size=(16, 16),
-        stride=(16, 16),
-        threshold=0.5
-    )
+    # run
+    run(image_name, output_folder, score_treshold, p_size, s_size)
+    
 
-    mask_to_image(mask, "data/mask_test.png")

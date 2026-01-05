@@ -37,5 +37,6 @@ cp -r scattering_transform/scattering .
   
 ## Notes
 - [DATE:03/01/2026] structures trop fines sur data amandine, probablement need to reduce windows size
+- [DATE:05/01/2026] Implementation d'un filtre maison qui marche pas trop mal pour spoter les ROI, prochaine étape selection des ROI / selection automatique du treshold ?
 
 
