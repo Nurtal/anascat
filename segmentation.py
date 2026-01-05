@@ -413,8 +413,8 @@ def run():
     """ """
 
     # params
-    patch_size = 32
-    nb_cluster = 2
+    patch_size = 12
+    nb_cluster = 4
     image_file = "data/Exp3.jpg"
 
     # extract image name
