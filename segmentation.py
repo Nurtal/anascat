@@ -214,6 +214,33 @@ def run_umap(data,image_name:str):
     return X_umap
 
 
+
+def run_umap_supervised(X,y,image_name:str):
+    """ 
+        Run a umap with basic parameters on dataset 
+    """
+    reducer = umap.UMAP(
+        n_neighbors=15,
+        min_dist=0.1,
+        n_components=2,
+        metric='euclidean',
+        random_state=42
+    )
+
+    X_umap = reducer.fit_transform(X, y=y)
+
+    plt.figure(figsize=(8,6))
+    plt.scatter(X_umap[:,0], X_umap[:,1], s=5)
+    plt.title("UMAP – Scattering features")
+    plt.xlabel("UMAP-1")
+    plt.ylabel("UMAP-2")
+    plt.savefig(f"images/{image_name}_umap.png")
+    plt.close()
+
+    return X_umap
+
+
+
 def run_kmean(n_clusters,data,image_name:str):
     """ """
 
@@ -462,11 +489,78 @@ def run():
 
 
 
+def run_supervised():
+    """ """
 
+    # params
+    patch_size = 32
+    nb_cluster = 2
+    image_file = "data/seg_test2.png"
+
+    # extract image name
+    image_name = image_file.split('/')[-1].split('.')[0]
+    image_format = image_file.split('/')[-1].split('.')[1]
+        
+    # init image repo
+    if not os.path.isdir('images'):
+        os.mkdir('images')
+    shutil.copy(image_file, f"images/{image_name}.{image_format}")
+
+    # load patch from class a & compute scattering
+    img_class_a = load_img("data/test/class_0/sample1.png")
+    patch_list_a, coords_a = extract_patches(img_class_a, patch_size, step=None, normalize='log', mask=None) 
+    X_a = run_scattering(patch_list_a, 6,2, patch_size)
+
+    # load patch from class a & compute scattering
+    img_class_b = load_img("data/test/class_1/sample1.png")
+    patch_list_b, coords_b = extract_patches(img_class_b, patch_size, step=None, normalize='log', mask=None) 
+    X_b = run_scattering(patch_list_b, 6,2, patch_size)
+
+    # load image
+    image = load_img(image_file)
+
+    # split into patches & compute scattering
+    patch_list, coords = extract_patches(image, patch_size, step=None, normalize='log', mask=None) 
+    X_all = run_scattering(patch_list, 6,2, patch_size)
+
+    # concat vectors
+    X = np.vstack([X_a, X_b, X_all])
+    y = np.concatenate([
+        np.zeros(len(X_a), dtype=int),
+        np.ones(len(X_b), dtype=int),
+        -np.ones(len(X_all), dtype=int)
+    ])
+
+    # normalize data
+    X = np.nan_to_num(X)
+    scaler = StandardScaler()
+    X_norm = scaler.fit_transform(X)
+
+    # run umap
+    X_umap=run_umap_supervised(X_norm, y,image_name)
+
+    print("Tardis")
+
+    # run kmeans
+    labels = run_kmean(nb_cluster,X_umap,image_name)
+
+    print("Cheesecake")
+    
+    # plot all clusters on image
+    plot_clusters(image, coords, labels, patch_size, image_name)
+
+    # user input for cluster listI
+    target_cluster_list = select_cluster_border(image_name, X_umap, image, coords, patch_size) 
+    # user_i = input(f"[+] Select clusters for borders :\n -> Visualisation at images/{image_name}_scat.png\n >> ")
+    # target_cluster_list = user_i.split(' ')
+    # target_cluster_list = [int(x) for x in target_cluster_list]
+
+    # generate mask
+    generate_mask(image, coords, labels, patch_size, image_name, target_cluster_list)
 
 if __name__ == "__main__":
 
-    run()
+    run_supervised()
 
 
 
