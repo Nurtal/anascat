@@ -495,7 +495,7 @@ def run_supervised():
     # params
     patch_size = 32
     nb_cluster = 2
-    image_file = "data/seg_test2.png"
+    image_file = "data/seg1.png"
 
     # extract image name
     image_name = image_file.split('/')[-1].split('.')[0]
@@ -507,12 +507,12 @@ def run_supervised():
     shutil.copy(image_file, f"images/{image_name}.{image_format}")
 
     # load patch from class a & compute scattering
-    img_class_a = load_img("data/test/class_0/sample1.png")
+    img_class_a = load_img("data/supervised/class_a/sample1.png")
     patch_list_a, coords_a = extract_patches(img_class_a, patch_size, step=None, normalize='log', mask=None) 
     X_a = run_scattering(patch_list_a, 6,2, patch_size)
 
     # load patch from class a & compute scattering
-    img_class_b = load_img("data/test/class_1/sample1.png")
+    img_class_b = load_img("data/supervised/class_b/sample1.png")
     patch_list_b, coords_b = extract_patches(img_class_b, patch_size, step=None, normalize='log', mask=None) 
     X_b = run_scattering(patch_list_b, 6,2, patch_size)
 
@@ -539,21 +539,19 @@ def run_supervised():
     # run umap
     X_umap=run_umap_supervised(X_norm, y,image_name)
 
-    print("Tardis")
-
     # run kmeans
     labels = run_kmean(nb_cluster,X_umap,image_name)
 
-    print("Cheesecake")
+    # Virer les labels des data qui ont servit à craft le umap (sinon ça foire le masque)
+    n_a = len(X_a)
+    n_b = len(X_b)
+    labels = labels[n_a + n_b:]
     
     # plot all clusters on image
     plot_clusters(image, coords, labels, patch_size, image_name)
 
     # user input for cluster listI
     target_cluster_list = select_cluster_border(image_name, X_umap, image, coords, patch_size) 
-    # user_i = input(f"[+] Select clusters for borders :\n -> Visualisation at images/{image_name}_scat.png\n >> ")
-    # target_cluster_list = user_i.split(' ')
-    # target_cluster_list = [int(x) for x in target_cluster_list]
 
     # generate mask
     generate_mask(image, coords, labels, patch_size, image_name, target_cluster_list)
